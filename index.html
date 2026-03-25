@@ -1,78 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UV Static v2</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LupineVault v2</title>
+    <link rel="stylesheet" href="style/global.css">
+    <link rel="stylesheet" href="style/browser.css">
     
-    <link rel="stylesheet" href="style/global.css" />
-    <link rel="stylesheet" href="style/browser.css" />
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
-    <script src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" type="module"></script>
 
     <script>
-      // 1. ENGINE REGISTRATION
-      window.addEventListener('load', async () => {
-        if ('serviceWorker' in navigator) {
-          try {
-            await navigator.serviceWorker.register('./uv/uv.sw.js', {
-              scope: '/service/' 
-            });
-            console.log("Engine: Connected");
-          } catch (err) {
-            console.error("Engine: Failed", err);
-          }
-        }
-      });
-
-      // 2. SEARCH LOGIC (FIXES THE RELOAD)
-      window.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('url-form');
-        const input = document.getElementById('url-input');
-
-        form.addEventListener('submit', async (event) => {
-          event.preventDefault(); // 🔥 STOPS THE RELOAD
-          
-          let url = input.value.trim();
-          if (!url) return;
-
-          // Process URL or Search
-          if (!url.includes('.') || url.includes(' ')) {
-            url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
-          } else if (!(url.startsWith('https://') || url.startsWith('http://'))) {
-            url = `https://${url}`;
-          }
-
-          // Encode and Redirect
-          const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
-          location.href = encodedUrl; 
+        window.addEventListener('load', async () => {
+            if ('serviceWorker' in navigator) {
+                await navigator.serviceWorker.register('./uv/uv.sw.js', {
+                    scope: '/service/'
+                });
+            }
         });
-      });
-    </script>
-    <style>body { background: #111; margin: 0; padding: 0; }</style>
-  </head>
 
-  <body>
-    <div id="main-content"></div>
+        function launchProxy(event) {
+            event.preventDefault();
+            const input = document.getElementById('url-input');
+            let url = input.value.trim();
+
+            if (!url.includes('.') || url.includes(' ')) {
+                url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+            } else if (!(url.startsWith('https://') || url.startsWith('http://'))) {
+                url = `https://${url}`;
+            }
+
+            // This line creates the actual proxy link
+            const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
+            
+            // This displays the site inside the iframe on your page
+            document.getElementById('uv-iframe').src = encodedUrl;
+            document.getElementById('uv-iframe').style.display = 'block';
+        }
+    </script>
+    <style>
+        body { background: #111; color: white; margin: 0; font-family: sans-serif; overflow: hidden; }
+        #uv-iframe { border: none; width: 100vw; height: calc(100vh - 100px); display: none; background: white; }
+        .sidebar-container { height: 100px; background: #1a1a1a; display: flex; align-items: center; padding: 0 20px; }
+        #url-input { width: 400px; padding: 10px; border-radius: 5px; border: none; background: #333; color: white; }
+    </style>
+</head>
+<body>
     <div class="sidebar-container">
-      <header>
-        <div class="page-data">
-          <span id="controls">
-            <button onclick="window.location.href='/'">v2</button>
-            <span>
-              <button id="page-back"><ion-icon name="arrow-back-outline"></ion-icon></button>
-              <button id="page-forward"><ion-icon name="arrow-forward-outline"></ion-icon></button>
-              <button id="page-refresh"><ion-icon name="refresh-outline"></ion-icon></button>
-              <button id="options-btn"><ion-icon name="menu-outline"></ion-icon></button>
-            </span>
-          </span>
-          <form id="url-form">
-            <input type="text" id="url-input" placeholder="Search or enter URL" autocomplete="off" />
-          </form>
-          <button id="new-tab"><ion-icon name="add-outline"></ion-icon><span>New Tab</span></button>
-        </div>
-      </header>
+        <form onsubmit="launchProxy(event)">
+            <input type="text" id="url-input" placeholder="Search or enter URL" autocomplete="off">
+        </form>
     </div>
-  </body>
+    <iframe id="uv-iframe"></iframe>
+</body>
 </html>
