@@ -14,7 +14,8 @@ window.addEventListener('load', async () => {
     const logDiv = document.getElementById('debug-log');
     if ('serviceWorker' in navigator) {
         try {
-            await navigator.serviceWorker.register('./uv/uv.sw.js', { scope: './' });
+            // SW is in root now, so scope './' covers everything
+            await navigator.serviceWorker.register('./uv.sw.js', { scope: './' });
             logDiv.textContent += "Service Worker: Registered ✅\n";
         } catch (err) {
             logDiv.textContent += "Service Worker: Failed ❌ " + err + "\n";
