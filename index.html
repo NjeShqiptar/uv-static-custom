@@ -3,22 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LupineVault v2</title>
+    <title>UV Static v2</title>
     
-    <script src="check.js" defer></script>
-    <script defer src="scripts/lstimer.js"></script>
-
     <link rel="stylesheet" href="style/global.css" />
     <link rel="stylesheet" href="style/browser.css" />
-    
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.2.nomodule.min.js"></script>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
+    <script src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" type="module"></script>
 
     <script>
+      // 1. ENGINE REGISTRATION
       window.addEventListener('load', async () => {
         if ('serviceWorker' in navigator) {
           try {
@@ -31,27 +25,41 @@
           }
         }
       });
-    </script>
 
-    <script src="scripts/tabs.mjs" type="module" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/gh/tf7software/Font-Awesome-pro-cdn@main/js/all.js"></script>
-    <style>body {padding: 0;margin: 0;}</style>
+      // 2. SEARCH LOGIC (FIXES THE RELOAD)
+      window.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('url-form');
+        const input = document.getElementById('url-input');
+
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault(); // 🔥 STOPS THE RELOAD
+          
+          let url = input.value.trim();
+          if (!url) return;
+
+          // Process URL or Search
+          if (!url.includes('.') || url.includes(' ')) {
+            url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+          } else if (!(url.startsWith('https://') || url.startsWith('http://'))) {
+            url = `https://${url}`;
+          }
+
+          // Encode and Redirect
+          const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
+          location.href = encodedUrl; 
+        });
+      });
+    </script>
+    <style>body { background: #111; margin: 0; padding: 0; }</style>
   </head>
 
   <body>
-    <div id="small-screen-overlay">Please use a larger screen.</div>
-    <div id="nav"></div>
     <div id="main-content"></div>
-    <div id="tab-view"></div>
     <div class="sidebar-container">
       <header>
         <div class="page-data">
           <span id="controls">
-            <button onclick="window.location.href='/'">
-              <svg width="38.454208mm" height="24.726074mm" viewBox="0 0 38.454208 24.726074"><g transform="translate(-145.0951,-136.5279)"><text style="font-size:32.9681px;font-family:Krungthep;fill:#5a32e3;" x="142.33917" y="161.25397">v2</text></g></svg>
-              <p class="tooltip">Home</p>
-            </button>
+            <button onclick="window.location.href='/'">v2</button>
             <span>
               <button id="page-back"><ion-icon name="arrow-back-outline"></ion-icon></button>
               <button id="page-forward"><ion-icon name="arrow-forward-outline"></ion-icon></button>
@@ -64,18 +72,7 @@
           </form>
           <button id="new-tab"><ion-icon name="add-outline"></ion-icon><span>New Tab</span></button>
         </div>
-        <div id="tab-list"></div>
       </header>
     </div>
-    <div id="menu-overlay">
-      <div class="option" id="devtools-option">Developer Tools</div>
-      <div class="option" id="abc-option">Open in about:blank</div>
-      <div class="option" id="git-option">GitHub</div>
-    </div>
-    <script>
-      const optionsBtn = document.getElementById("options-btn");
-      const overlay = document.getElementById("menu-overlay");
-      optionsBtn.addEventListener("click", () => overlay.classList.toggle("active"));
-    </script>
   </body>
 </html>
