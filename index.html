@@ -4,53 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LupineVault v2</title>
-    <link rel="stylesheet" href="style/global.css">
-    <link rel="stylesheet" href="style/browser.css">
     
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
 
     <script>
+        // 1. REGISTER THE ENGINE
         window.addEventListener('load', async () => {
             if ('serviceWorker' in navigator) {
-                await navigator.serviceWorker.register('./uv/uv.sw.js', {
-                    scope: '/service/'
-                });
+                try {
+                    await navigator.serviceWorker.register('./uv/uv.sw.js', {
+                        scope: '/service/'
+                    });
+                    console.log("Proxy Engine: Ready");
+                } catch (err) {
+                    console.error("Proxy Engine: Failed", err);
+                }
             }
         });
 
+        // 2. SEARCH LOGIC (FIXES THE 404)
         function launchProxy(event) {
-            event.preventDefault();
+            event.preventDefault(); 
             const input = document.getElementById('url-input');
             let url = input.value.trim();
 
+            if (!url) return;
+
+            // Force Google Search if it's not a URL
             if (!url.includes('.') || url.includes(' ')) {
                 url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
             } else if (!(url.startsWith('https://') || url.startsWith('http://'))) {
                 url = `https://${url}`;
             }
 
-            // This line creates the actual proxy link
+            // This creates the link: /service/encoded-url
             const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
             
-            // This displays the site inside the iframe on your page
-            document.getElementById('uv-iframe').src = encodedUrl;
-            document.getElementById('uv-iframe').style.display = 'block';
+            // This loads the site into the iframe below
+            const frame = document.getElementById('uv-iframe');
+            frame.src = encodedUrl;
+            frame.style.display = 'block';
+            document.getElementById('home-ui').style.display = 'none';
         }
     </script>
+
     <style>
-        body { background: #111; color: white; margin: 0; font-family: sans-serif; overflow: hidden; }
-        #uv-iframe { border: none; width: 100vw; height: calc(100vh - 100px); display: none; background: white; }
-        .sidebar-container { height: 100px; background: #1a1a1a; display: flex; align-items: center; padding: 0 20px; }
-        #url-input { width: 400px; padding: 10px; border-radius: 5px; border: none; background: #333; color: white; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #0f0f0f; font-family: sans-serif; color: white; overflow: hidden; }
+        #nav-bar { height: 60px; background: #1a1a1a; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #333; }
+        #url-input { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 8px; width: 400px; outline: none; }
+        #url-input:focus { border-color: #5a32e3; }
+        #home-ui { display: flex; flex-direction: column; align-items: center; justify-content: center; height: calc(100vh - 60px); }
+        .logo { font-size: 50px; font-weight: bold; color: #5a32e3; margin-bottom: 20px; }
+        #uv-iframe { width: 100%; height: calc(100vh - 60px); border: none; display: none; background: white; }
     </style>
 </head>
 <body>
-    <div class="sidebar-container">
+
+    <div id="nav-bar">
+        <div style="color: #5a32e3; font-weight: bold; margin-right: 20px; cursor: pointer;" onclick="location.reload()">v2</div>
         <form onsubmit="launchProxy(event)">
-            <input type="text" id="url-input" placeholder="Search or enter URL" autocomplete="off">
+            <input type="text" id="url-input" placeholder="Search or enter URL..." autocomplete="off">
         </form>
     </div>
+
+    <div id="home-ui">
+        <div class="logo">LupineVault</div>
+        <p>Type a URL above to start unblocking.</p>
+    </div>
+
     <iframe id="uv-iframe"></iframe>
+
 </body>
 </html>
