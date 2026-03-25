@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LupineVault v2</title>
 
-    <!-- Ultraviolet core -->
+    <!-- UV scripts -->
     <script src="./uv/uv.bundle.js" defer></script>
     <script src="./uv/uv.config.js" defer></script>
 
     <script>
-        // Register the proxy engine
+        // 1. REGISTER THE ENGINE
         window.addEventListener('load', async () => {
             if ('serviceWorker' in navigator) {
                 try {
+                    // Make sure this points to the correct SW file in uv/
                     await navigator.serviceWorker.register('./uv/uv.sw.js', {
                         scope: './'
                     });
@@ -24,23 +25,25 @@
             }
         });
 
-        // Launch proxy
+        // 2. SEARCH LOGIC
         function launchProxy(event) {
-            event.preventDefault();
+            event.preventDefault(); 
             const input = document.getElementById('url-input');
             let url = input.value.trim();
 
             if (!url) return;
 
-            // Convert searches to Google
+            // Force Google search if input is not a URL
             if (!url.includes('.') || url.includes(' ')) {
                 url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
-            } else if (!url.startsWith('https://') && !url.startsWith('http://')) {
+            } else if (!(url.startsWith('https://') || url.startsWith('http://'))) {
                 url = `https://${url}`;
             }
 
+            // Encode the URL for the UV proxy
             const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
 
+            // Load into iframe
             const frame = document.getElementById('uv-iframe');
             frame.src = encodedUrl;
             frame.style.display = 'block';
