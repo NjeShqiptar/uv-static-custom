@@ -1,7 +1,6 @@
 self.__uv$config = {
     prefix: "/service/",
-    // 👇 YOUR ACTUAL BACKEND LINK 👇
-    wisp: "wss://proxy-backend-jf48.onrender.com/wisp/", 
+    wisp: "wss://proxy-backend-jf48.onrender.com/wisp/", // Your Render Backend
     encodeUrl: Ultraviolet.codec.xor.encode,
     decodeUrl: Ultraviolet.codec.xor.decode,
     handler: "/uv/uv.handler.js",
